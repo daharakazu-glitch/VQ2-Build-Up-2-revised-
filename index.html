@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Up 2 Exercises: Subject-Verb Agreement & Tense</title>
+    <!-- エラーハンドリング用スクリプト -->
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error("Global Error Caught:", message, error);
+            return false;
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        .control-button:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+        .highlight {
+            color: #16A34A; /* green-600 */
+            font-weight: bold;
+        }
+        .placeholder {
+            color: #3B82F6; /* blue-500 */
+            font-weight: bold;
+        }
+        .incorrect-text {
+            color: #4B5563; /* gray-600 */
+        }
+        .explanation-panel, .recognition-panel, .feedback-panel {
+            transition: all 0.3s ease-in-out;
+        }
+        .recording {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        /* 選択肢ボタンのスタイル */
+        .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: #111827;
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .option-btn:hover:not(:disabled) {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .option-btn.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #16a34a; /* green-600 */
+            color: #14532d; /* green-900 */
+        }
+        .option-btn.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #dc2626; /* red-600 */
+            color: #7f1d1d; /* red-900 */
+        }
+        /* 入力フィールドのスタイル */
+        .input-full {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.375rem;
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .input-full:focus {
+            border-color: #3b82f6;
+            outline: none;
+        }
+        .input-full.correct {
+            border-color: #16a34a;
+            background-color: #f0fdf4;
+        }
+        .input-full.incorrect {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Build Up 2 Exercises</h1>
+            <p class="text-gray-600 mt-2">主語と動詞の呼応・時制の一致 (Subject-Verb Agreement & Sequence of Tenses)</p>
+        </header>
+
+        <main class="space-y-6" id="main-content">
+            <section>
+                <h2 class="text-2xl font-bold text-gray-700 border-l-4 border-blue-500 pl-4 mb-4">1. 適切な語句の選択</h2>
+                <p class="mb-4 text-gray-600 ml-4 text-sm">正解だと思う選択肢をクリックしてください。</p>
+                <div id="sentences-1" class="space-y-4"></div>
+            </section>
+            <section>
+                <h2 class="text-2xl font-bold text-gray-700 border-l-4 border-green-500 pl-4 mb-4">2. 誤文訂正</h2>
+                <p class="mb-4 text-gray-600 ml-4 text-sm">英文には誤りがあります。解答表示で正解を確認してください。</p>
+                <div id="sentences-2" class="space-y-4"></div>
+            </section>
+            <section>
+                <h2 class="text-2xl font-bold text-gray-700 border-l-4 border-purple-500 pl-4 mb-4">3. 語句整序</h2>
+                <p class="mb-4 text-gray-600 ml-4 text-sm">カッコ内の語句を並べ替えて、英文全体またはカッコ内の正解を入力してください。</p>
+                <div id="sentences-4" class="space-y-4"></div>
+            </section>
+            <section>
+                <h2 class="text-2xl font-bold text-gray-700 border-l-4 border-red-500 pl-4 mb-4">4. 和文英訳</h2>
+                <p class="mb-4 text-gray-600 ml-4 text-sm">次の日本語を英語に直しなさい。</p>
+                <div id="sentences-5" class="space-y-4"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        try {
+            // PDFのデータに基づく問題リスト
+            const sentences = [
+                // 1. Multiple Choice (Mapped to Category 1)
+                { 
+                    id: 1, category: '1', 
+                    en: "Linguistics is a compulsory subject at our university.", 
+                    jp: "言語学は私たちの大学では必修科目です。", 
+                    explanation: "linguistics（言語学）、mathematics（数学）、physics（物理学）のように -ics で終わる学問・学科名は単数扱いします。", 
+                    answer: "is",
+                    options: ["a. have been", "b. is", "c. are", "d. were"]
+                },
+                { 
+                    id: 2, category: '1', 
+                    en: "Twelve years have passed since my sister got married.", 
+                    jp: "姉[妹]が結婚してから12年になります。", 
+                    explanation: "動詞が pass [go by]（過ぎる）の場合、年月はひとまとまりとせず複数扱いします（1年が12回過ぎたイメージ）。なお、It is [has been] twelve years since... の形なら単数扱いの it を主語にします。", 
+                    answer: "have passed",
+                    options: ["a. has been", "b. is", "c. have passed", "d. had passed"]
+                },
+                { 
+                    id: 3, category: '1', 
+                    en: "Bread and butter is usually served automatically with meals at American restaurants.", 
+                    jp: "アメリカのレストランではたいてい、バター付きのパンが自動的に食事と共に出される。", 
+                    explanation: "bread and butter は「バター付きのパン」という一つの食品・概念を表すため、単数扱いします。", 
+                    answer: "is",
+                    options: ["a. are", "b. is", "c. look", "d. seem"]
+                },
+                { 
+                    id: 4, category: '1', 
+                    en: "The new products sold on the Internet have made this company profitable.", 
+                    jp: "インターネット上で売られている新製品のおかげで、この会社はもうかっている。", 
+                    explanation: "主語は The new products（複数）です。sold on the Internet は修飾語句なので、動詞は products に合わせて have made となります。", 
+                    answer: "have made",
+                    options: ["a. making", "b. has made", "c. have made", "d. have been made"]
+                },
+                { 
+                    id: 5, category: '1', 
+                    en: "Twenty kilometers sounds like a long way for small children to walk.", 
+                    jp: "20キロは、小さい子どもが歩くには長い道のりのように聞こえる。", 
+                    explanation: "Twenty kilometers という距離を「ひとまとまり」と考えるので単数扱いします。", 
+                    answer: "sounds",
+                    options: ["a. sound", "b. sounds", "c. look", "d. seem"]
+                },
+                { 
+                    id: 6, category: '1', 
+                    en: "Neither Michael nor his co-workers are aware of the mistake.", 
+                    jp: "マイケルも彼の同僚たちもその間違いに気付いていない。", 
+                    explanation: "Neither A nor B が主語になる場合、動詞は B（ここでは his co-workers）に一致させます。", 
+                    answer: "are",
+                    options: ["a. are", "b. be", "c. being", "d. is"]
+                },
+                { 
+                    id: 7, category: '1', 
+                    en: "We learned that light travels much faster than sound.", 
+                    jp: "私たちは、光は音よりもはるかに速く空間を伝わると習った。", 
+                    explanation: "「光は音よりも速い」は不変の真理なので、主節が過去形（learned）でも従属節は現在形（travels）のままにします。", 
+                    answer: "travels",
+                    options: ["a. is traveled", "b. travel", "c. travels", "d. would have traveled"]
+                },
+                { 
+                    id: 8, category: '1', 
+                    en: "He said that he would finish the paper by Tuesday.", 
+                    jp: "彼は、火曜日までにそのレポートを仕上げるつもりだと言った。", 
+                    explanation: "主節が過去形（said）なので、時制の一致により従属節の will finish は would finish になります。", 
+                    answer: "he would finish",
+                    options: ["a. he finishes", "b. he is finished", "c. he would finish", "d. he will have finishing"]
+                },
+                { 
+                    id: 9, category: '1', 
+                    en: "The doctor strongly recommended that my father do moderate exercise.", 
+                    jp: "その医者は、父が適度な運動をすべきだと強く勧めた。", 
+                    explanation: "提案・要求・命令などを表す動詞（recommend, suggest, demand 等）に続く that 節内では、動詞の原形（または should + 原形）を用います。三人称単数の s はつきません。", 
+                    answer: "do",
+                    options: ["a. do", "b. does", "c. did", "d. done"]
+                },
+                { 
+                    id: 10, category: '1', 
+                    en: "Do you know the British refer to an elevator by a different name?", 
+                    jp: "英国人は、エレベーターのことを別の名前で呼んでいることを知っていますか。", 
+                    explanation: "the British は「英国人全体」を表し、複数扱いとなります（British people と同義）。", 
+                    answer: "refer",
+                    options: ["a. is referred", "b. refers", "c. are referred", "d. refer"]
+                },
+                { 
+                    id: 11, category: '1', 
+                    en: "We were lucky because it had stopped snowing by the time we reached the ski lift, so the weather was perfect.", 
+                    jp: "私たちがスキーリフトに到着するまでに雪が止んでいて幸運だった。それで、天候は完璧だった。", 
+                    explanation: "「雪が止んだ」のは「到着した（過去）」よりも前の出来事なので、過去完了形（had stopped）を用います。", 
+                    answer: "had stopped",
+                    options: ["a. had stopped", "b. was still", "c. has stopped", "d. will have stopped"]
+                },
+                { 
+                    id: 12, category: '1', 
+                    en: "The police are investigating the murder, but no one has been arrested yet.", 
+                    jp: "警察はその殺人を捜査しているが、まだ誰も逮捕されていない。", 
+                    explanation: "police（警察）は集合名詞で、常に複数扱いとなります。", 
+                    answer: "are",
+                    options: ["a. are", "b. has been", "c. is", "d. would be"]
+                },
+                { 
+                    id: 13, category: '1', 
+                    en: "I treated her nicely as though she were my own child.", 
+                    jp: "まるで彼女が私自身の子どもであるかのようによく扱った。", 
+                    explanation: "as though（まるで～のように）の後に続く節は、事実に反する仮定を表すため、仮定法過去（be動詞なら were）を用います。時制の一致は受けません。", 
+                    answer: "were",
+                    options: ["a. be", "b. has been", "c. shall be", "d. were"]
+                },
+                { 
+                    id: 14, category: '1', 
+                    en: "Something strange happened at school yesterday when we were having lunch.", 
+                    jp: "私たちが昼食をとっていた時、学校で何か奇妙なことが起こった。", 
+                    explanation: "「起こった」のは「食べていた」のと同じ過去の時点です。happen は自動詞なので受動態にはしません。", 
+                    answer: "happened",
+                    options: ["a. happened", "b. happens", "c. is happened", "d. was happened"]
+                },
+                { 
+                    id: 15, category: '1', 
+                    en: "We were happy that the new air-conditioning system had been installed before the summer came.", 
+                    jp: "夏が来る前に新しい空調装置が設置されていて、私たちはうれしかった。", 
+                    explanation: "「設置された」のは「うれしかった（過去）」よりも前のことなので、過去完了形の受動態（had been installed）にします。", 
+                    answer: "had been installed",
+                    options: ["a. had been installed", "b. had been installing", "c. had installed", "d. installed"]
+                },
+
+                // 2. Error Correction (Mapped to Category 2)
+                {
+                    id: 16, category: '2',
+                    en: "Food coloring is added to food to replace colors that are lost during preparation, or to make food look more attractive.",
+                    incorrect: "Food coloring is added to food to replace colors that are lost during preparation, or making food look more attractive.",
+                    jp: "食用色素は、調理中に失われる色の代わりをさせるためや食品を魅力的に見せるために加えられる。",
+                    answer: "to make",
+                    explanation: "to replace と並列して目的を表すため、making ではなく to make とする必要があります。"
+                },
+                {
+                    id: 17, category: '2',
+                    en: "The WHO says that eighty percent of children who are not vaccinated against preventable diseases live in 10 countries in Africa and Southeast Asia.",
+                    incorrect: "The WHO says that eighty percents of children who are not vaccinated against preventable diseases live in 10 countries in Africa and Southeast Asia.",
+                    jp: "WHO(世界保健機関)によると、予防可能な病気に対するワクチンを受けていない子どもの80%がアフリカや東南アジアの10か国に住んでいる。",
+                    answer: "eighty percent",
+                    explanation: "「数詞 + percent」の形では percent を複数形にしません。"
+                },
+                {
+                    id: 18, category: '2',
+                    en: "The Industrial Revolution began in England around 1750, and then spread gradually to other European countries.",
+                    incorrect: "The Industrial Revolution began in England around 1750, and then spread gradually to another European countries.",
+                    jp: "産業革命は1750年頃にイギリスで始まり、それからほかのヨーロッパ諸国に徐々に広がった。",
+                    answer: "other",
+                    explanation: "European countries と複数名詞が続くため、単数名詞につく another ではなく other を用います。"
+                },
+                {
+                    id: 19, category: '2',
+                    en: "Michelle's qualifications and her enthusiasm have enabled her to rise to the highest position in the office.",
+                    incorrect: "Michelle's qualifications and her enthusiasm has enabled her to rise to the highest position in the office.",
+                    jp: "ミシェルは資格と熱意によって会社で最高の地位まで上り詰めることができた。",
+                    answer: "have enabled",
+                    explanation: "主語は Michelle's qualifications and her enthusiasm（A and B）なので複数扱いとなり、動詞は has ではなく have になります。"
+                },
+                {
+                    id: 20, category: '2',
+                    en: "The vast majority of material available online is in English, and according to UNESCO, 90% of the world's languages are not represented at all on the Internet.",
+                    incorrect: "The vast majority of material available online is of English, and according to UNESCO, 90% of the world's languages are not represented at all on the Internet.",
+                    jp: "オンラインで入手可能な資料の大多数が英語で書かれており、UNESCO(国連教育科学文化機関)によると、世界の言語の90%がインターネット上でまったく見受けられない。",
+                    answer: "in English",
+                    explanation: "「英語で（書かれている）」は in English で表します。"
+                },
+
+                // 4. Ordering (Mapped to Category 4)
+                { 
+                    id: 21, category: '4', 
+                    en: "You have only to look at the statistics to see things are getting better.", 
+                    jp: "統計を見さえすれば、事態が好転しつつあるのがわかる。", 
+                    scrambled: "( have / at / only / to / look / you )", 
+                    answer: "You have only to look at", 
+                    explanation: "「～しさえすればよい」は have only to do ... で表します。" 
+                },
+                { 
+                    id: 22, category: '4', 
+                    en: "Mike might have been there yesterday, but I didn't see him.", 
+                    jp: "ひょっとするとマイクは昨日そこにいたかもしれないが、私は彼に会わなかった。", 
+                    scrambled: "( been / have / might / Mike / there / yesterday )", 
+                    answer: "Mike might have been there yesterday", 
+                    explanation: "「～だったかもしれない（過去の推量）」は might have + 過去分詞 で表します。" 
+                },
+                { 
+                    id: 23, category: '4', 
+                    en: "I can't find my wallet. I must have left it in the taxi.", 
+                    jp: "財布が見つからない。タクシーの中に置き忘れたに違いない。", 
+                    scrambled: "( left / have / I / in / it / must )", 
+                    answer: "I must have left it in", 
+                    explanation: "「～したに違いない（過去の確信）」は must have + 過去分詞 で表します。" 
+                },
+                { 
+                    id: 24, category: '4', 
+                    en: "You can't be too careful when crossing the street.", 
+                    jp: "通りを渡るときは、いくら注意してもし過ぎるということはない。", 
+                    scrambled: "( be / can't / careful / too / when / you )", 
+                    answer: "You can't be too careful when", 
+                    explanation: "cannot ... too ～ で「いくら～してもしすぎることはない」という慣用表現です。" 
+                },
+
+                // 5. Translation (Mapped to Category 5)
+                { 
+                    id: 25, category: '5', 
+                    en: "I have to finish my chemistry paper by Monday morning.", 
+                    jp: "月曜日の朝までに化学のレポートを終わらせないといけない。", 
+                    answer: "I have to finish my chemistry paper by Monday morning.", 
+                    explanation: "「～しなければならない」は have to、「化学のレポート」は chemistry paper、「月曜日の朝までに」は by Monday morning を使います。" 
+                },
+                { 
+                    id: 26, category: '5', 
+                    en: "We must be careful not to repeat the same mistake.", 
+                    jp: "同じ間違いを繰り返さないように注意しなければなりません。", 
+                    answer: "We must be careful not to repeat the same mistake.", 
+                    explanation: "「～しないように」は not to do (不定詞の否定)、「同じ間違いを繰り返す」は repeat the same mistake。" 
+                },
+                { 
+                    id: 27, category: '5', 
+                    en: "You shouldn't have eaten so much.", 
+                    jp: "君はそんなに食べるべきではなかった。", 
+                    answer: "You shouldn't have eaten so much.", 
+                    explanation: "「～すべきではなかった（のにした）」という過去への後悔・非難は should not have + 過去分詞 で表します。" 
+                },
+                { 
+                    id: 28, category: '5', 
+                    en: "The typhoon may hit Japan directly.", 
+                    jp: "台風は日本を直撃する可能性がある。", 
+                    answer: "The typhoon may hit Japan directly.", 
+                    explanation: "「～する可能性がある」は may、「直撃する」は hit ... directly を使います。" 
+                },
+                { 
+                    id: 29, category: '5', 
+                    en: "You must be tired after your long trip.", 
+                    jp: "あなたは長旅の後で疲れているに違いない。", 
+                    answer: "You must be tired after your long trip.", 
+                    explanation: "「～に違いない（現在の確信）」は must be ...、「長旅」は long trip。" 
+                }
+            ];
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+            let mediaRecorder;
+            let mediaStream;
+            let americanVoice = null; 
+
+            function loadAndSetVoice() {
+                try {
+                    const voices = speechSynthesis.getVoices();
+                    if (voices.length === 0) return;
+                    americanVoice = voices.find(voice => voice.name === 'Google US English') ||
+                                    voices.find(voice => voice.name === 'Samantha') ||
+                                    voices.find(voice => voice.lang === 'en-US'); 
+                } catch (e) {
+                    console.warn("Speech Synthesis Voice Load Error:", e);
+                }
+            }
+
+            loadAndSetVoice(); 
+            if (speechSynthesis && speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = loadAndSetVoice;
+            }
+
+            if (SpeechRecognition) {
+                try {
+                    recognition = new SpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.lang = 'en-US';
+                    recognition.interimResults = false;
+                    recognition.maxAlternatives = 1;
+                } catch (e) {
+                    console.warn("SpeechRecognition Init Error:", e);
+                }
+            }
+
+            function normalizeText(text) {
+                return text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s\s+/g, ' ').trim().toLowerCase();
+            }
+
+            // 類似度計算ロジック
+            function calculateSimilarity(s1, s2) {
+                let longer = s1;
+                let shorter = s2;
+                if (s1.length < s2.length) {
+                    longer = s2;
+                    shorter = s1;
+                }
+                let longerLength = longer.length;
+                if (longerLength === 0) return 1.0;
+                return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+            }
+
+            function editDistance(s1, s2) {
+                s1 = s1.toLowerCase();
+                s2 = s2.toLowerCase();
+                const costs = new Array();
+                for (let i = 0; i <= s1.length; i++) {
+                    let lastValue = i;
+                    for (let j = 0; j <= s2.length; j++) {
+                        if (i == 0) costs[j] = j;
+                        else {
+                            if (j > 0) {
+                                let newValue = costs[j - 1];
+                                if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                                    newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                                costs[j - 1] = lastValue;
+                                lastValue = newValue;
+                            }
+                        }
+                    }
+                    if (i > 0) costs[s2.length] = lastValue;
+                }
+                return costs[s2.length];
+            }
+
+            function handleRecording(sentence, recordButton, resultPanel) {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    resultPanel.innerHTML = `<p class="text-red-500 font-bold">エラー: マイク機能が使用できません。</p>`;
+                    return;
+                }
+                if (!recognition) {
+                    resultPanel.innerHTML = `<p class="text-red-500">お使いのブラウザは音声認識に対応していません。</p>`;
+                    return;
+                }
+                if (recordButton.classList.contains('recording')) {
+                    try { recognition.stop(); } catch(e) {}
+                    return;
+                }
+                
+                resultPanel.innerHTML = ''; 
+
+                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                        mediaStream = stream; 
+                        mediaRecorder = new MediaRecorder(stream);
+                        let audioChunks = [];
+
+                        mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                        mediaRecorder.onstop = () => {
+                            if (audioChunks.length === 0) return;
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            setTimeout(() => {
+                                if (resultPanel.innerHTML.trim() !== '' && !resultPanel.querySelector('.playback-div')) {
+                                    const playbackDiv = document.createElement('div');
+                                    playbackDiv.className = 'playback-div flex items-center space-x-2 mt-3 pt-3 border-t border-gray-200';
+                                    playbackDiv.innerHTML = `
+                                        <button class="control-button p-2 rounded-full bg-indigo-500 text-white hover:bg-indigo-600 focus:outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                                        </button>
+                                        <p class="text-sm text-gray-600">自分の音声を確認する</p>
+                                    `;
+                                    const audioPlayer = new Audio(audioUrl);
+                                    playbackDiv.querySelector('button').onclick = () => audioPlayer.play();
+                                    resultPanel.appendChild(playbackDiv);
+                                }
+                            }, 100);
+                            audioChunks = [];
+                        };
+
+                        recognition.start();
+                        recognition.onstart = () => {
+                            recordButton.classList.add('recording', 'bg-red-500');
+                            recordButton.classList.remove('bg-green-500');
+                            resultPanel.innerHTML = `<p class="text-gray-500">録音中...</p>`;
+                            if(mediaRecorder.state === 'inactive') mediaRecorder.start();
+                        };
+
+                        recognition.onend = () => {
+                            recordButton.classList.remove('recording', 'bg-red-500');
+                            recordButton.classList.add('bg-green-500');
+                            if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+                            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+                        };
+
+                        recognition.onresult = (event) => {
+                            if (!event.results?.[0]?.[0]?.transcript) {
+                                resultPanel.innerHTML = `<p class="text-yellow-600">認識できませんでした。</p>`;
+                                return;
+                            }
+                            const transcript = event.results[0][0].transcript;
+                            const score = Math.round(calculateSimilarity(normalizeText(sentence), normalizeText(transcript)) * 100);
+
+                            let colorClass = score >= 85 ? 'text-green-600' : (score >= 65 ? 'text-yellow-600' : 'text-red-600');
+                            let feedback = score >= 85 ? '素晴らしい！' : (score >= 65 ? '惜しい！' : 'もう一度！');
+                            
+                            resultPanel.innerHTML = `
+                                <p class="text-gray-800">あなたの発音: 「${transcript}」</p>
+                                <div class="flex items-center mt-2">
+                                    <p class="font-bold ${colorClass}">${feedback}</p>
+                                    <p class="ml-4 text-sm text-gray-600">スコア: ${score}点</p>
+                                </div>`;
+                        };
+                    }).catch(err => {
+                        resultPanel.innerHTML = `<p class="text-red-500">マイクアクセスエラー</p>`;
+                    });
+            }
+
+            // 選択肢テキストから記号部分を除去するヘルパー関数
+            function getOptionText(text) {
+                const parts = text.split('. ');
+                return parts.length > 1 ? parts.slice(1).join('. ') : text;
+            }
+
+            function createSentenceCard(sentence, displayId) {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow-md';
+                
+                const contentAndControls = document.createElement('div');
+                contentAndControls.className = 'flex items-start space-x-4';
+
+                const numberDiv = document.createElement('div');
+                numberDiv.className = 'flex-shrink-0 bg-gray-200 text-gray-700 font-bold rounded-full h-8 w-8 flex items-center justify-center text-sm';
+                numberDiv.textContent = String(displayId);
+
+                const textContentDiv = document.createElement('div');
+                textContentDiv.className = 'flex-grow w-full';
+
+                const enP = document.createElement('p');
+                enP.className = 'text-lg text-gray-800 font-medium leading-relaxed';
+
+                const jpP = document.createElement('p');
+                jpP.className = 'text-gray-600 mt-1';
+                jpP.textContent = sentence.jp;
+
+                // Controls
+                const controlsDiv = document.createElement('div');
+                controlsDiv.className = 'flex flex-col items-center space-y-2 ml-2 flex-shrink-0';
+
+                const audioButton = document.createElement('button');
+                audioButton.className = 'control-button p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 focus:outline-none';
+                audioButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>`;
+                audioButton.onclick = () => {
+                    if (speechSynthesis.speaking) speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(sentence.en);
+                    if (americanVoice) utterance.voice = americanVoice;
+                    speechSynthesis.speak(utterance);
+                };
+
+                const recordButton = document.createElement('button');
+                recordButton.className = 'control-button p-2 rounded-full bg-green-500 text-white hover:bg-green-600 focus:outline-none';
+                recordButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v3a3 3 0 01-3 3z" /></svg>`;
+                const recognitionPanel = document.createElement('div');
+                recognitionPanel.className = 'recognition-panel mt-3';
+                recordButton.onclick = () => handleRecording(sentence.en, recordButton, recognitionPanel);
+
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'flex items-center space-x-2 mt-2';
+                const toggleAnswerButton = document.createElement('button');
+                toggleAnswerButton.className = 'control-button text-xs px-2 py-1 bg-yellow-400 text-yellow-800 rounded-md hover:bg-yellow-500';
+                toggleAnswerButton.textContent = '解答表示';
+                const toggleExplanationButton = document.createElement('button');
+                toggleExplanationButton.className = 'control-button text-xs px-2 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300';
+                toggleExplanationButton.textContent = '解説';
+
+                // Feedback panel
+                const feedbackPanel = document.createElement('div');
+                feedbackPanel.className = 'feedback-panel mt-2 text-sm font-bold hidden';
+
+                let isAnswerShown = false;
+
+                // --- RENDERING LOGIC BASED ON CATEGORY ---
+                
+                // Common: Add Japanese Toggle for Category 1 & 2
+                if (sentence.category === '1' || sentence.category === '2') {
+                    jpP.classList.add('hidden'); // Default hide
+                    const toggleJpButton = document.createElement('button');
+                    toggleJpButton.className = 'control-button text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200';
+                    toggleJpButton.textContent = '日本語訳';
+                    toggleJpButton.onclick = () => {
+                        jpP.classList.toggle('hidden');
+                    };
+                    buttonGroup.appendChild(toggleJpButton);
+                }
+
+                // Category 1: Multiple Choice
+                if (sentence.category === '1') {
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'mt-4 space-y-2'; 
+                    
+                    const answerRegex = new RegExp(`\\b${sentence.answer}\\b`);
+                    const hiddenHTML = sentence.en.replace(answerRegex, `<span class='placeholder font-bold text-xl'>( &emsp; )</span>`); 
+                    const correctHTML = sentence.en.replace(answerRegex, `<span class='highlight text-xl'>${sentence.answer}</span>`);
+                    enP.innerHTML = hiddenHTML;
+
+                    sentence.options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'option-btn';
+                        btn.textContent = opt;
+                        btn.onclick = () => {
+                            const optionText = getOptionText(opt);
+                            const isCorrect = optionText.trim() === sentence.answer.trim();
+
+                            Array.from(optionsDiv.children).forEach(c => c.classList.remove('correct', 'incorrect'));
+                            
+                            if (isCorrect) {
+                                btn.classList.add('correct');
+                                feedbackPanel.innerHTML = `<span class="text-green-600">Correct! 正解です。</span>`;
+                                enP.innerHTML = correctHTML; 
+                            } else {
+                                btn.classList.add('incorrect');
+                                feedbackPanel.innerHTML = `<span class="text-red-600">Try Again. 不正解です。</span>`;
+                            }
+                            feedbackPanel.classList.remove('hidden');
+                        };
+                        optionsDiv.appendChild(btn);
+                    });
+                    
+                    textContentDiv.appendChild(enP);
+                    textContentDiv.appendChild(optionsDiv); 
+                    textContentDiv.appendChild(feedbackPanel);
+
+                    toggleAnswerButton.onclick = () => {
+                        isAnswerShown = !isAnswerShown;
+                        enP.innerHTML = isAnswerShown ? correctHTML : hiddenHTML;
+                        toggleAnswerButton.textContent = isAnswerShown ? '問題文表示' : '解答表示';
+                        
+                        if (isAnswerShown) {
+                             Array.from(optionsDiv.children).forEach(btn => {
+                                 if (getOptionText(btn.textContent).trim() === sentence.answer.trim()) {
+                                     btn.classList.add('correct');
+                                 }
+                             });
+                         } else {
+                             Array.from(optionsDiv.children).forEach(btn => {
+                                 btn.classList.remove('correct', 'incorrect');
+                             });
+                             feedbackPanel.classList.add('hidden');
+                         }
+                    };
+
+                // Category 2: Error Correction
+                } else if (sentence.category === '2') {
+                    // Show incorrect sentence initially
+                    enP.innerHTML = `<span class="incorrect-text">${sentence.incorrect}</span>`;
+                    
+                    const correctHTML = sentence.en.replace(sentence.answer, `<span class='highlight text-xl'>${sentence.answer}</span>`);
+
+                    textContentDiv.appendChild(enP);
+
+                    toggleAnswerButton.onclick = () => {
+                        isAnswerShown = !isAnswerShown;
+                        enP.innerHTML = isAnswerShown ? correctHTML : `<span class="incorrect-text">${sentence.incorrect}</span>`;
+                        toggleAnswerButton.textContent = isAnswerShown ? '問題文表示' : '解答表示';
+                    };
+
+                // Category 4: Scrambled (Ordering)
+                } else if (sentence.category === '4') {
+                    const scrambledHTML = sentence.en.replace(sentence.answer, `<span class='placeholder text-sm bg-gray-100 p-1 rounded'>${sentence.scrambled}</span>`);
+                    const correctHTML = sentence.en.replace(sentence.answer, `<span class='highlight'>${sentence.answer}</span>`);
+                    enP.innerHTML = scrambledHTML;
+                    textContentDiv.appendChild(enP);
+
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mt-2';
+                    const inputField = document.createElement('input');
+                    inputField.type = 'text';
+                    inputField.className = 'input-full';
+                    inputField.placeholder = '並べ替えた部分、または文全体を入力';
+                    
+                    const checkButton = document.createElement('button');
+                    checkButton.className = 'bg-indigo-500 text-white px-4 py-1 rounded text-sm hover:bg-indigo-600 transition mt-2';
+                    checkButton.textContent = 'Check Answer';
+                    
+                    checkButton.onclick = () => {
+                        const userVal = normalizeText(inputField.value);
+                        const correctVal = normalizeText(sentence.answer);
+                        const fullSentenceVal = normalizeText(sentence.en);
+                        
+                        if ((userVal === correctVal) || (userVal === fullSentenceVal) || (fullSentenceVal.includes(userVal) && userVal.length > 10)) { 
+                             inputField.classList.add('correct');
+                             inputField.classList.remove('incorrect');
+                             feedbackPanel.innerHTML = `<span class="text-green-600">Correct!</span>`;
+                        } else {
+                             inputField.classList.add('incorrect');
+                             inputField.classList.remove('correct');
+                             feedbackPanel.innerHTML = `<span class="text-red-600">Try again.</span>`;
+                        }
+                         feedbackPanel.classList.remove('hidden');
+                    };
+
+                    inputDiv.appendChild(inputField);
+                    inputDiv.appendChild(checkButton);
+                    textContentDiv.appendChild(inputDiv);
+                    textContentDiv.appendChild(feedbackPanel);
+
+                    toggleAnswerButton.onclick = () => {
+                        isAnswerShown = !isAnswerShown;
+                        enP.innerHTML = isAnswerShown ? correctHTML : scrambledHTML;
+                        toggleAnswerButton.textContent = isAnswerShown ? '問題文表示' : '解答表示';
+                        if (!isAnswerShown) {
+                            feedbackPanel.classList.add('hidden');
+                            inputField.classList.remove('correct', 'incorrect');
+                            inputField.value = '';
+                        }
+                    };
+
+                // Category 5: Translation
+                } else if (sentence.category === '5') {
+                    enP.innerHTML = `<span class="placeholder italic text-gray-400">以下に英文を入力してください</span>`;
+                    textContentDiv.appendChild(enP);
+
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mt-2';
+                    const inputField = document.createElement('textarea');
+                    inputField.className = 'input-full';
+                    inputField.rows = 2;
+                    inputField.placeholder = '英文を入力...';
+                    
+                    const checkButton = document.createElement('button');
+                    checkButton.className = 'bg-indigo-500 text-white px-4 py-1 rounded text-sm hover:bg-indigo-600 transition mt-2';
+                    checkButton.textContent = 'Check Answer';
+
+                    checkButton.onclick = () => {
+                        const userVal = normalizeText(inputField.value);
+                        const correctVal = normalizeText(sentence.en);
+                        
+                        if (userVal === correctVal) {
+                             inputField.classList.add('correct');
+                             inputField.classList.remove('incorrect');
+                             feedbackPanel.innerHTML = `<span class="text-green-600">Perfect!</span>`;
+                        } else {
+                             inputField.classList.add('incorrect');
+                             inputField.classList.remove('correct');
+                             feedbackPanel.innerHTML = `<span class="text-red-600">Check spelling or grammar.</span>`;
+                        }
+                         feedbackPanel.classList.remove('hidden');
+                    };
+                    
+                    inputDiv.appendChild(inputField);
+                    inputDiv.appendChild(checkButton);
+                    textContentDiv.appendChild(inputDiv);
+                    textContentDiv.appendChild(feedbackPanel);
+
+                    const correctHTML = `<span class="highlight">${sentence.en}</span>`;
+                    
+                    toggleAnswerButton.onclick = () => {
+                        isAnswerShown = !isAnswerShown;
+                        enP.innerHTML = isAnswerShown ? correctHTML : `<span class="placeholder italic text-gray-400">以下に英文を入力してください</span>`;
+                        toggleAnswerButton.textContent = isAnswerShown ? '問題文表示' : '解答表示';
+                         if (!isAnswerShown) {
+                            feedbackPanel.classList.add('hidden');
+                            inputField.classList.remove('correct', 'incorrect');
+                            inputField.value = '';
+                        }
+                    };
+                }
+
+                textContentDiv.appendChild(jpP);
+                buttonGroup.appendChild(toggleAnswerButton);
+                buttonGroup.appendChild(toggleExplanationButton);
+                controlsDiv.appendChild(audioButton);
+                controlsDiv.appendChild(recordButton);
+                controlsDiv.appendChild(buttonGroup);
+
+                contentAndControls.appendChild(numberDiv);
+                contentAndControls.appendChild(textContentDiv);
+                contentAndControls.appendChild(controlsDiv);
+
+                const explanationPanel = document.createElement('div');
+                explanationPanel.className = 'explanation-panel hidden mt-3 pt-3 border-t border-gray-200 bg-blue-50 p-3 rounded';
+                explanationPanel.innerHTML = `<p class="text-sm text-blue-900"><span class="font-bold">解説:</span> ${sentence.explanation}</p>`;
+                
+                toggleExplanationButton.onclick = () => explanationPanel.classList.toggle('hidden');
+
+                card.appendChild(contentAndControls);
+                card.appendChild(explanationPanel);
+                card.appendChild(recognitionPanel);
+
+                return card;
+            }
+
+            function renderSentences() {
+                const containers = {
+                    '1': document.getElementById('sentences-1'),
+                    '2': document.getElementById('sentences-2'),
+                    '4': document.getElementById('sentences-4'),
+                    '5': document.getElementById('sentences-5'),
+                };
+
+                const categoryCounters = { '1': 0, '2': 0, '4': 0, '5': 0 };
+
+                sentences.forEach(sentence => {
+                    if (containers[sentence.category]) {
+                        categoryCounters[sentence.category]++;
+                        containers[sentence.category].appendChild(createSentenceCard(sentence, categoryCounters[sentence.category]));
+                    }
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', renderSentences);
+            } else {
+                renderSentences();
+            }
+
+        } catch (e) {
+            console.error(e);
+        }
+    </script>
+</body>
+</html>
